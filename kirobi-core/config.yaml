@@ -1,0 +1,264 @@
+# kirobi-core/config.yaml
+# Zentrale Konfiguration des Kirobi KI-Systems
+# Optimiert für: AMD Ryzen 9 5900X + NVIDIA RTX 3090 (24 GB VRAM)
+#
+# Diese Datei wird von agent_loop.py geladen.
+# Alle CHANGEME-Werte müssen vor der ersten Verwendung angepasst werden.
+
+# ============================================================
+# SYSTEM-IDENTITÄT
+# ============================================================
+system:
+  name: "Kirobi"
+  version: "6.0"
+  description: "Autonomer lokal-first KI-Super-Orchestrator"
+  operator: "sven"
+  timezone: "Europe/Berlin"
+  language: "de"
+
+# ============================================================
+# HARDWARE-PROFIL
+# ============================================================
+hardware:
+  cpu:
+    model: "AMD Ryzen 9 5900X"
+    cores: 12
+    threads: 24
+    base_clock_ghz: 3.7
+    boost_clock_ghz: 4.8
+    # Threads für Python AsyncIO-Worker
+    worker_threads: 8
+
+  gpu:
+    model: "NVIDIA RTX 3090"
+    cuda_cores: 10496
+    vram_gb: 24
+    cuda_version: "12.x"
+    # CUDA-Gerät ID (0 = erste GPU)
+    device_id: 0
+    # Maximale VRAM-Nutzung für Ollama (in GB, Reserve für System)
+    max_vram_for_ollama_gb: 22
+
+  ram:
+    total_gb: 64  # Anpassen an tatsächlich verbaute RAM-Menge
+    # RAM-Anteil für Python/KI-Prozesse
+    max_usage_gb: 48
+
+# ============================================================
+# OLLAMA KONFIGURATION
+# ============================================================
+ollama:
+  host: "http://localhost:11434"
+  timeout_seconds: 300
+
+  # Standardmodell für allgemeine Aufgaben
+  default_model: "llama3.1:70b"
+
+  # Fallback-Modell bei Speicherproblemen oder Timeout
+  fallback_model: "llama3.1:8b"
+
+  # Embedding-Modell für Vektorsuche
+  embedding_model: "nomic-embed-text"
+
+  # Code-Modell für Programmieraufgaben
+  code_model: "codellama:13b"
+
+  # Modell-spezifische Einstellungen
+  model_settings:
+    "llama3.1:70b":
+      context_length: 8192
+      # Anzahl paralleler Generierungs-Layers auf GPU
+      num_gpu: 99  # Alle Layer auf GPU (24 GB VRAM reicht)
+      num_thread: 8
+      temperature: 0.7
+      top_p: 0.9
+
+    "llama3.1:8b":
+      context_length: 8192
+      num_gpu: 99
+      num_thread: 4
+      temperature: 0.7
+      top_p: 0.9
+
+    "codellama:13b":
+      context_length: 16384
+      num_gpu: 99
+      num_thread: 4
+      temperature: 0.2  # Niedrig für präzisen Code
+      top_p: 0.95
+
+    "nomic-embed-text":
+      context_length: 8192
+      num_gpu: 10  # Embedding braucht wenig GPU
+
+# ============================================================
+# AGENTLOOP KONFIGURATION
+# ============================================================
+agent_loop:
+  # Wie oft der Loop pro Sekunde läuft (0 = so schnell wie möglich)
+  tick_rate_hz: 1
+
+  # Maximale Aufgaben in der Queue
+  max_queue_size: 100
+
+  # Maximale parallele Aufgaben
+  max_concurrent_tasks: 3
+
+  # Timeout für eine einzelne Aufgabe (Sekunden)
+  task_timeout_seconds: 600
+
+  # Reflexionsintervall: Nach wie vielen Aufgaben reflektieren
+  reflection_interval: 5
+
+  # Maximale Anzahl von Wiederholungen bei Fehlern
+  max_retries: 3
+
+  # Retry-Verzögerung (Sekunden, exponentiell)
+  retry_backoff_seconds: 5
+
+  # Pfade
+  workspace_dir: "/kirobi/workspace"
+  log_dir: "/kirobi/logs"
+  state_file: "/kirobi/data/agent_state.json"
+
+# ============================================================
+# 4-QUADRANTEN ENGINE (Eisenhower-Matrix)
+# ============================================================
+quadrant_engine:
+  # Schwellenwerte für die Klassifizierung (0.0 - 1.0)
+  thresholds:
+    importance_high: 0.6   # Ab diesem Wert: "wichtig"
+    urgency_high: 0.6      # Ab diesem Wert: "dringend"
+
+  # Verarbeitungsprioritäten (1 = höchste Priorität)
+  priorities:
+    Q1_wichtig_dringend: 1       # Sofort erledigen
+    Q2_wichtig_nicht_dringend: 2 # Planen und einplanen
+    Q3_dringend_nicht_wichtig: 3 # Delegieren oder schnell erledigen
+    Q4_weder_noch: 4             # Eliminieren oder stark verzögern
+
+  # Scoring-Gewichtung für automatische Klassifizierung
+  scoring:
+    # Keywords die Wichtigkeit erhöhen
+    importance_keywords:
+      high: ["kritisch", "sicherheit", "fehler", "system", "daten", "verlust", "notfall"]
+      medium: ["projekt", "deadline", "meeting", "familie", "arbeit"]
+      low: ["optional", "nice-to-have", "irgendwann", "idee"]
+
+    # Keywords die Dringlichkeit erhöhen
+    urgency_keywords:
+      high: ["sofort", "jetzt", "dringend", "heute", "asap", "notfall"]
+      medium: ["diese woche", "bald", "zeitnah"]
+      low: ["wenn möglich", "irgendwann", "langfristig"]
+
+# ============================================================
+# SELF-IMPROVEMENT-LOOP
+# ============================================================
+self_improvement:
+  enabled: true
+
+  # Wie oft der Self-Improvement-Loop läuft (in Aufgabenzyklen)
+  analysis_interval: 20
+
+  # Metriken die analysiert werden
+  metrics:
+    - "task_completion_rate"
+    - "average_response_time"
+    - "error_rate"
+    - "model_selection_accuracy"
+    - "user_satisfaction_proxy"
+
+  # Automatische Optimierungen erlaubt
+  auto_optimize:
+    prompt_templates: true    # Prompts automatisch verbessern
+    model_selection: true     # Modell-Auswahl optimieren
+    temperature_tuning: true  # Temperature anpassen
+    retry_strategy: true      # Retry-Strategie anpassen
+
+  # Maximale Änderungen pro Optimierungsrunde
+  max_changes_per_round: 3
+
+  # Optimierungshistorie speichern
+  history_file: "/kirobi/data/optimization_history.json"
+
+# ============================================================
+# HERMES KOMMUNIKATIONS-AGENT
+# ============================================================
+hermes:
+  enabled: true
+
+  # Benachrichtigungs-Kanäle
+  channels:
+    # Lokale Desktop-Benachrichtigungen (via notify-send)
+    desktop:
+      enabled: true
+
+    # Webhook (z.B. für Homarr oder andere lokale Dienste)
+    webhook:
+      enabled: false
+      url: "http://localhost:7575/api/notifications"  # Homarr
+      auth_token: "CHANGEME"
+
+    # E-Mail (optional, nur für wichtige Alerts)
+    email:
+      enabled: false
+      smtp_host: "localhost"
+      smtp_port: 587
+      from: "kirobi@home.local"
+      to: "sven@home.local"
+
+  # Benachrichtigungsschwellen
+  notify_on:
+    task_completed: false   # Zu viele Notifications bei aktiviertem Loop
+    task_failed: true
+    system_error: true
+    self_improvement: true  # Wenn Kirobi sich selbst verbessert hat
+    daily_summary: true     # Tägliche Zusammenfassung
+
+  # Tägliche Zusammenfassung um (24h)
+  daily_summary_time: "08:00"
+
+# ============================================================
+# SPEICHER UND PERSISTENZ
+# ============================================================
+storage:
+  # Vektordatenbank für semantische Suche (lokal)
+  vector_db:
+    enabled: true
+    type: "chromadb"  # Lokal, kein externer Server
+    persist_dir: "/kirobi/data/vectordb"
+    collection_name: "kirobi_memory"
+
+  # Konversations-History
+  conversation_history:
+    max_entries: 1000
+    file: "/kirobi/data/conversation_history.json"
+
+  # Aufgaben-Logs
+  task_logs:
+    dir: "/kirobi/logs/tasks"
+    max_files: 100
+    rotate_daily: true
+
+# ============================================================
+# SICHERHEIT
+# ============================================================
+security:
+  # Kein Zugriff auf das Internet ohne explizite Erlaubnis
+  allow_internet_access: false
+
+  # Erlaubte lokale Dienste
+  allowed_local_services:
+    - "http://localhost:11434"    # Ollama
+    - "http://localhost:7575"     # Homarr
+    - "http://home-server:9000"   # MinIO
+
+  # Code-Ausführung erlaubt (für Code-Agent)
+  allow_code_execution: true
+  code_execution_sandbox: "/kirobi/workspace/sandbox"
+
+  # Maximale Ressourcennutzung
+  resource_limits:
+    max_cpu_percent: 80
+    max_ram_percent: 70
+    max_disk_write_mbps: 500

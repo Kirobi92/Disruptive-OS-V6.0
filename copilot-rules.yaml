@@ -1,0 +1,137 @@
+# Copilot Rules — Disruptive OS V6.0
+# Version: 1.0
+# Projekt: Kirobi Autonomous AI OS
+
+rules:
+  # ============================================================
+  # ALLGEMEIN
+  # ============================================================
+  general:
+    language: "de"
+    project_type: "nixos-infrastructure"
+    philosophy: "local-first, declarative, reproducible"
+
+  # ============================================================
+  # NIX / NIXOS
+  # ============================================================
+  nix:
+    use_flakes: true
+    nixos_version: "24.11"
+    forbidden:
+      - "nix-channel"
+      - "nix-env -i"
+      - "environment.systemPackages via imperative"
+    required_inputs:
+      - "nixpkgs"
+      - "nixos-hardware"
+      - "home-manager"
+    style:
+      indentation: 2
+      attribute_style: "camelCase"
+
+  # ============================================================
+  # PYTHON
+  # ============================================================
+  python:
+    version: "3.11"
+    type_hints: true
+    async_preferred: true
+    forbidden_patterns:
+      - "import *"
+      - "eval("
+      - "exec("
+      - "os.system("
+    preferred_libraries:
+      logging: "structlog"
+      http: "httpx"
+      ai_client: "ollama"
+    docstring_style: "google"
+
+  # ============================================================
+  # SHELL
+  # ============================================================
+  shell:
+    shebang: "#!/usr/bin/env bash"
+    required_options: "set -euo pipefail"
+    quote_variables: true
+    error_to_stderr: true
+
+  # ============================================================
+  # SICHERHEIT
+  # ============================================================
+  security:
+    no_secrets_in_repo: true
+    secrets_management: "agenix"
+    firewall_always_enabled: true
+    remote_access: "tailscale-only"
+    forbidden_patterns:
+      - "password = "
+      - "secret = "
+      - "apiKey = "
+      - "token = "
+    allowed_placeholder: "CHANGEME"
+
+  # ============================================================
+  # STORAGE / ZFS
+  # ============================================================
+  storage:
+    zfs_pools:
+      - name: "tank"
+        type: "mirror"
+        devices: 2
+        description: "Haupt-Pool auf 2x1TB NVMe"
+      - name: "backup"
+        type: "single"
+        devices: 1
+        description: "Backup-Pool auf 2TB HDD"
+    datasets:
+      private:
+        - "tank/private/sven"
+        - "tank/private/samira"
+        - "tank/private/sineo"
+      shared:
+        - "tank/shared/family"
+      kirobi:
+        - "tank/kirobi"
+
+  # ============================================================
+  # SERVICES (Home-Server)
+  # ============================================================
+  services:
+    nextcloud:
+      enabled: true
+      local_only: true
+    immich:
+      enabled: true
+      media_path: "/mnt/tank/kirobi/immich"
+    jellyfin:
+      enabled: true
+      media_path: "/mnt/tank/shared/family/media"
+    minio:
+      enabled: true
+      s3_compatible: true
+    nfs:
+      enabled: true
+    homarr:
+      enabled: true
+    tailscale:
+      enabled: true
+
+  # ============================================================
+  # KI-SYSTEM (Kirobi)
+  # ============================================================
+  kirobi:
+    hardware:
+      gpu: "RTX 3090"
+      cuda: true
+      vram_gb: 24
+    ollama:
+      enabled: true
+      cuda_acceleration: true
+    components:
+      - "AgentLoop"
+      - "4-Quadranten-Engine"
+      - "Self-Improvement-Loop"
+      - "Hermes-Agent"
+    default_model: "llama3.1:70b"
+    fallback_model: "llama3.1:8b"

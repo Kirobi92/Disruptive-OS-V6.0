@@ -1,0 +1,98 @@
+# NixOS
+result
+result-*
+.direnv/
+.devenv/
+
+# Nix build artifacts
+*.drv
+*.lock.bak
+
+# Secrets (NIEMALS committen!)
+secrets/
+*.age
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets.yaml
+secrets.json
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv/
+dist/
+build/
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Docker
+.docker/
+
+# KI / ML
+*.gguf
+*.bin
+*.safetensors
+models/
+weights/
+checkpoints/
+*.pt
+*.pth
+*.onnx
+
+# Ollama Modelle (zu groß für Git)
+ollama-models/
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editors
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+.nvim/
+
+# Temporäre Dateien
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Node (falls benötigt für Tools)
+node_modules/
+npm-debug.log*
+
+# ZFS Snapshots-Metadaten (lokal)
+.zfs/
+
+# SSH-Schlüssel
+id_rsa
+id_ed25519
+id_ecdsa
+*.pub.bak
+
+# Home-Manager generierte Dateien
+home-manager-files/
