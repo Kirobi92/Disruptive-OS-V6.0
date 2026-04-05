@@ -88,10 +88,8 @@
     # Firewall
     firewall = {
       enable = true;
-      # Ollama API (nur lokal)
-      allowedTCPPorts = [ 11434 ];
-      # SSH
-      allowedTCPPorts = [ 22 ];
+      # SSH + Ollama API (nur lokal)
+      allowedTCPPorts = [ 22 11434 ];
     };
   };
 
